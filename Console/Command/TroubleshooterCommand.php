@@ -11,6 +11,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableSeparator;
 use MagentoSupport\ART\Model\DbDataSeeker;
+use Magento\Framework\HTTP\Client\Curl;
 
 /**
  * Class TroubleshooterCommand
@@ -31,12 +32,24 @@ class TroubleshooterCommand extends Command
     private $dbDataSeeker;
 
     /**
+     * @var CurlClient
+     */
+    private $curlClient;
+
+    /**
+     * @var string
+     */
+    protected $apiUrl = 'https://web74.us-west-2.prd.sparta.ceng.magento.com/roliinyk/api-bridge/public/mbilogs/';
+
+    /**
      * TroubleshooterCommand constructor.
      * @param DbDataSeeker $dbDataSeeker
+     * @param Curl $curl
      */
-    public function __construct(DbDataSeeker $dbDataSeeker)
+    public function __construct(DbDataSeeker $dbDataSeeker, Curl $curl)
     {
         $this->dbDataSeeker = $dbDataSeeker;
+        $this->curlClient = $curl;
         parent::__construct();
     }
 
@@ -59,10 +72,25 @@ class TroubleshooterCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $this->runQuestionnaire($input,$output);
-        $io->progressStart(7);
-        $dbData = $this->dbDataSeeker->seekDbData($io);
+        $io->progressStart(2);
+        $dbData = $this->dbDataSeeker->seekDbData();
+        $io->progressAdvance(1);
+        $logData = null;
+        if (isset($this->questionData['project_id'])) {
+            $projectId = $this->questionData['project_id'];
+            try {
+                $this->curlClient->get($this->apiUrl.$projectId);
+                $logData = $this->curlClient->getBody();
+            }
+            catch (\Exception $e) {
+                throw new \RuntimeException(
+                    $e->getMessage()
+                );
+            }
+        }
+        $io->progressAdvance(2);
         $io->progressFinish();
-        $this->renderOutput($dbData, $io);
+        $this->renderOutput($logData, $dbData, $output);
         return 0;
     }
 
@@ -108,31 +136,19 @@ class TroubleshooterCommand extends Command
     /**
      * render output
      * @param $dbData
-     * @param $io
+     * @param $output
      */
-    private function renderOutput($dbData,$io) {
+    private function renderOutput($logData, $dbData,$output) {
 
-        $io->definitionList(
-            'Is module Enabled?',
-            ['' => $dbData['isModuleEnabled']],
-            new TableSeparator(),
-            'Analytics Cron Execution time',
-            ['' => $dbData['cronExecTime']],
-            new TableSeparator(),
-            'Search Cron Job in Database:',
-            ['' => $dbData['analytic_cron_job']],
-            new TableSeparator(),
-            'Checking  Analytic token:',
-            ['' => $dbData['isTokenPresent']],
-            new TableSeparator(),
-            'Flag table:',
-            ['' => $dbData['flagTable']],
-            new TableSeparator(),
-            'Check escaped quotes and slashes in order_item table:',
-            ['' => $dbData['escapedQuotes']],
-            new TableSeparator(),
-            'Check multi currency:',
-            ['' => $dbData['isMultiCurrency']]
-        );
+        $output->writeln("Is module Enabled?: ". $dbData['isModuleEnabled']);
+        $output->writeln("Analytics Cron Execution time: ". $dbData['cronExecTime']);
+        $output->writeln("Checking  Analytic token: ". $dbData['isTokenPresent']);
+        $output->writeln("Search Cron Job in Database: ". $dbData['analytic_cron_job']);
+        $output->writeln("Flag table:". $dbData['flagTable']);
+        $output->writeln("Check escaped quotes and slashes in order_item table:". $dbData['escapedQuotes']);
+        $output->writeln("Check multi currency:". $dbData['isMultiCurrency']);
+        $output->writeln("Data FROM NR access Logs -----------------------------------------------------------");
+        $output->writeln(print_r($logData));
+
     }
 }
