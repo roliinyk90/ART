@@ -13,7 +13,7 @@ It is Magento module for help troubleshoot problems with Advanced Reporting
 - Download the module:
 
   
-  `composer require magentosupport/art`
+  `composer require magentosupport/art:dev-master`
   
 
 - Enable the module:
