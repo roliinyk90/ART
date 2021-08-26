@@ -31,36 +31,27 @@ class DbDataSeeker
     }
 
     /**
-     * Select needed data from Database
-     * @param \Symfony\Component\Console\Style\SymfonyStyle $io
      * @return array
      */
-    public function seekDbData(\Symfony\Component\Console\Style\SymfonyStyle $io) {
+    public function seekDbData() {
         $this->data['isModuleEnabled'] = $this->selectFromCoreConfig(
             ['scope','scope_id','value'],
             'analytics/subscription/enabled'
         );
-        $io->progressAdvance(1);
 
         //todo check custom group
         $this->data['cronExecTime'] = $this->selectFromCoreConfig(
             ['scope','scope_id','value'],
             'analytics_collect_data/schedule/cron_expr'
         );
-        $io->progressAdvance(2);
         $this->data['analytic_cron_job'] = $this->findAnalyticsCronJobInDb();
-        $io->progressAdvance(3);
         $this->data['isTokenPresent'] = $this->data['cronExecTime'] = $this->selectFromCoreConfig(
             ['scope','scope_id','value'],
             'analytics/general/token'
         );
-        $io->progressAdvance(4);
         $this->data['flagTable'] = $this->checkFlagTable();
-        $io->progressAdvance(5);
         $this->data['escapedQuotes'] = $this->checkEscapedQuotes();
-        $io->progressAdvance(6);
         $this->data['isMultiCurrency'] = $this->isMultiCurrency();
-        $io->progressAdvance(7);
         return $this->data;
 
     }
