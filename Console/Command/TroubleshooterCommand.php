@@ -39,7 +39,7 @@ class TroubleshooterCommand extends Command
     /**
      * @var string
      */
-    protected $apiUrl = 'https://web74.us-west-2.prd.sparta.ceng.magento.com/roliinyk/api-bridge/public/mbilogs/';
+    protected $apiUrl = 'web74.us-west-2.prd.sparta.ceng.magento.com/roliinyk/api-bridge/public/mbilogs/';
 
     /**
      * @var string
