@@ -42,6 +42,11 @@ class TroubleshooterCommand extends Command
     protected $apiUrl = 'https://web74.us-west-2.prd.sparta.ceng.magento.com/roliinyk/api-bridge/public/mbilogs/';
 
     /**
+     * @var string
+     */
+    protected $urlPrefix = 'https://';
+
+    /**
      * TroubleshooterCommand constructor.
      * @param DbDataSeeker $dbDataSeeker
      * @param Curl $curl
@@ -79,7 +84,10 @@ class TroubleshooterCommand extends Command
         if (isset($this->questionData['project_id'])) {
             $projectId = $this->questionData['project_id'];
             try {
-                $this->curlClient->get($this->apiUrl.$projectId);
+                if (strpos($_SERVER['SERVER_NAME'], 'sparta.ceng.magento.com') !== false) {
+                    $this->urlPrefix = 'http://';
+                }
+                $this->curlClient->get($this->urlPrefix.$this->apiUrl.$projectId);
                 $logData = $this->curlClient->getBody();
             }
             catch (\Exception $e) {
