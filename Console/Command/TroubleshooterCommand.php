@@ -91,9 +91,7 @@ class TroubleshooterCommand extends Command
                 $logData = $this->curlClient->getBody();
             }
             catch (\Exception $e) {
-                throw new \RuntimeException(
-                    $e->getMessage()
-                );
+                $logData = $e->getMessage();
             }
         }
         $io->progressAdvance(2);
