@@ -14,6 +14,8 @@ It is Magento module for help troubleshoot problems with Advanced Reporting
 
   
   `composer require magentosupport/art:dev-master`
+
+    In case of problems with composer installation feel free to install the module commonly by creating Magentosupport folder in app/code folder and clone this repo inside 
   
 
 - Enable the module:
@@ -35,3 +37,4 @@ Disable module:
 Remove module:
 
 `composer remove magentosupport/art`
+
