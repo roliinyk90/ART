@@ -84,7 +84,8 @@ class TroubleshooterCommand extends Command
         if (isset($this->questionData['project_id'])) {
             $projectId = $this->questionData['project_id'];
             try {
-                if (strpos($_SERVER['SERVER_NAME'], 'sparta.ceng.magento.com') !== false) {
+                if (isset($_SERVER['HOSTNAME']) &&
+                    strpos($_SERVER['HOSTNAME'], 'sparta.ceng.magento.com') !== false) {
                     $this->urlPrefix = 'http://';
                 }
                 $this->curlClient->get($this->urlPrefix.$this->apiUrl.$projectId);
